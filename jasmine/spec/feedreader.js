@@ -10,9 +10,9 @@
  */
 $(function() {
     /* This is our first test suite - a test suite just contains
-    * a related set of tests. This suite is all about the RSS
-    * feeds definitions, the allFeeds variable in our application.
-    */
+     * a related set of tests. This suite is all about the RSS
+     * feeds definitions, the allFeeds variable in our application.
+     */
     describe('RSS Feeds', function() {
         /* This is our first test - it tests to make sure that the
          * allFeeds variable has been defined and that it is not
@@ -26,47 +26,127 @@ $(function() {
             expect(allFeeds.length).not.toBe(0);
         });
 
-
-        /* TODO: Write a test that loops through each feed
+        /* a test that loops through each feed
          * in the allFeeds object and ensures it has a URL defined
-         * and that the URL is not empty.
+         * and that the URL is not empty (or a valid url).
          */
+        it('all feeds have a non empty url', function() {
+
+            for (var i = 0; i < allFeeds.length; i++) {
+                var feed = allFeeds[i];
+                expect(feed.url).toBeDefined();
+                expect(isUrl(feed.url)).toBe(true);
+            }
+
+            //http://stackoverflow.com/questions/1701898/how-to-detect-whether-a-string-is-in-url-format-using-javascript
+            function isUrl(s) {
+                var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+                return regexp.test(s);
+            }
+
+        });
 
 
-        /* TODO: Write a test that loops through each feed
+        /* a test that loops through each feed
          * in the allFeeds object and ensures it has a name defined
          * and that the name is not empty.
          */
+        it('all feeds have a non empty name', function() {
+
+            for (var i = 0; i < allFeeds.length; i++) {
+                var feed = allFeeds[i];
+                expect(feed.name).toBeDefined();
+                expect(feed.name.length > 0).toBe(true);
+            }
+        });
+    });
+
+    /* Test suite - 'The Menu'
+     * This suite is all about test for the app menu
+     */
+    describe('The Menu', function() {
+
+        /* a test that ensures the menu element
+        is hidden by default.*/
+        it('menu element is hidden', function() {
+            expect($('body').hasClass('menu-hidden')).toBe(true);
+        });
+
+        /* a test that ensures the menu changes
+         * visibility when the menu icon is clicked. This test
+         * should have two expectations: does the menu display when
+         * clicked and does it hide when clicked again.
+         */
+
+        it('click on menu icon toggles menu', function() {
+
+            $('.menu-icon-link').click();
+            expect($('body').hasClass('menu-hidden')).toBe(false);
+            $('.menu-icon-link').click();
+            expect($('body').hasClass('menu-hidden')).toBe(true);
+        });
+
+    });
+
+    /* Test suite - 'Initial Entries'
+     * This suite is ....
+     */
+    describe('Initial Entries', function() {
+
+        beforeEach(function(done) {
+            loadFeed(0);
+            done();
+        });
+
+        /* a test that ensures when the loadFeed
+         * function is called and completes its work, there is at least
+         * a single .entry element within the .feed container.
+         */
+        it('load feed adds entry class to feed container', function(done) {
+            expect($('.feed .entry').length).toBeGreaterThan(0);
+            done();
+        });
+
     });
 
 
-    /* TODO: Write a new test suite named "The menu" */
+    /* Test suite - 'New Feed Selection'
+     * This suite is ....
+     */
+    describe('New Feed Selection', function() {
 
-        /* TODO: Write a test that ensures the menu element is
-         * hidden by default. You'll have to analyze the HTML and
-         * the CSS to determine how we're performing the
-         * hiding/showing of the menu element.
+        var firstFeedTitle, firstFeedEntries,
+            secondFeedTitle, secondFeedEntries;
+
+        beforeEach(function(done) {
+            loadFeed(1, function() {
+                // async load first feed item
+                firstFeedTitle = $('.header-title').text();
+                firstFeedEntries = $('entry');
+                done();
+            });
+        });
+
+        /* a test that ensures when a new feed is loaded the content changes
          */
+        it('on new loadFeed the feed content changes', function(done) {
+            // async load second feed item
+            loadFeed(2, function() {
+                secondFeedTitle = $('.header-title').text();
+                secondFeedEntries = $('.entry');
+                // the heading for the feed should have changed
+                expect(firstFeedTitle).not.toBe(secondFeedTitle);
+                // the feed entries for the feed should have changed
+                expect(firstFeedEntries).not.toBe(secondFeedEntries);
+                done();
+            });
 
-         /* TODO: Write a test that ensures the menu changes
-          * visibility when the menu icon is clicked. This test
-          * should have two expectations: does the menu display when
-          * clicked and does it hide when clicked again.
-          */
+        });
 
-    /* TODO: Write a new test suite named "Initial Entries" */
-
-        /* TODO: Write a test that ensures when the loadFeed
-         * function is called and completes its work, there is at least
-         * a single .entry element within the .feed container.
-         * Remember, loadFeed() is asynchronous so this test will require
-         * the use of Jasmine's beforeEach and asynchronous done() function.
-         */
-
-    /* TODO: Write a new test suite named "New Feed Selection"
-
-        /* TODO: Write a test that ensures when a new feed is loaded
-         * by the loadFeed function that the content actually changes.
-         * Remember, loadFeed() is asynchronous.
-         */
+        afterEach(function(done) {
+          // reset app so that the initial feed is selected
+            loadFeed(0);
+            done();
+        });
+    });
 }());
