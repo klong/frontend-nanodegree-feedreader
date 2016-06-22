@@ -14,6 +14,7 @@ $(function() {
      * feeds definitions, the allFeeds variable in our application.
      */
     describe('RSS Feeds', function() {
+
         /* This is our first test - it tests to make sure that the
          * allFeeds variable has been defined and that it is not
          * empty. Experiment with this before you get started on
@@ -32,6 +33,8 @@ $(function() {
          */
         it('all feeds have a non empty url', function() {
 
+            expect(allFeeds).toBeDefined();
+            expect(allFeeds.length).not.toBe(0);
             for (var i = 0; i < allFeeds.length; i++) {
                 var feed = allFeeds[i];
                 expect(feed.url).toBeDefined();
@@ -53,6 +56,8 @@ $(function() {
          */
         it('all feeds have a non empty name', function() {
 
+            expect(allFeeds).toBeDefined();
+            expect(allFeeds.length).not.toBe(0);
             for (var i = 0; i < allFeeds.length; i++) {
                 var feed = allFeeds[i];
                 expect(feed.name).toBeDefined();
@@ -62,7 +67,7 @@ $(function() {
     });
 
     /* Test suite - 'The Menu'
-     * This suite is all about test for the app menu
+     * This suite is all about testing the app menu
      */
     describe('The Menu', function() {
 
@@ -77,11 +82,15 @@ $(function() {
          * should have two expectations: does the menu display when
          * clicked and does it hide when clicked again.
          */
+        var menuIconExists = ($('.menu-icon-link').length === 0) ? false : true;
 
         it('click on menu icon toggles menu', function() {
-
+            // check that the menu-icon-link element exisits
+            expect(menuIconExists).toBe(true);
+            // simulate a first mouse click on menu-icon
             $('.menu-icon-link').click();
             expect($('body').hasClass('menu-hidden')).toBe(false);
+            // simulate a second mouse click on menu-icon
             $('.menu-icon-link').click();
             expect($('body').hasClass('menu-hidden')).toBe(true);
         });
@@ -89,13 +98,15 @@ $(function() {
     });
 
     /* Test suite - 'Initial Entries'
-     * This suite is ....
      */
     describe('Initial Entries', function() {
 
+        var loadFeedCallBackTest = false;
+
         beforeEach(function(done) {
             loadFeed(0, function() {
-              done();
+                loadFeedCallBackTest = true;
+                done();
             });
         });
 
@@ -104,6 +115,7 @@ $(function() {
          * a single .entry element within the .feed container.
          */
         it('load feed adds entry class to feed container', function(done) {
+            expect(loadFeedCallBackTest).toBe(true);
             expect($('.feed .entry').length).toBeGreaterThan(0);
             done();
         });
@@ -112,18 +124,21 @@ $(function() {
 
 
     /* Test suite - 'New Feed Selection'
-     * This suite is ....
      */
     describe('New Feed Selection', function() {
 
         var firstFeedTitle, firstFeedEntries,
-            secondFeedTitle, secondFeedEntries;
+            otherFeedTitle, otherFeedEntries;
 
         beforeEach(function(done) {
-            loadFeed(1, function() {
-                // async load first feed item
+            expect(allFeeds).toBeDefined();
+            expect(allFeeds.length).not.toBe(0);
+
+            // async call to get first feed
+            loadFeed(0, function() {
+                // async load first feed in allFeeds
                 firstFeedTitle = $('.header-title').text();
-                firstFeedEntries = $('entry');
+                firstFeedEntries = $('entry').text();
                 done();
             });
         });
@@ -131,21 +146,25 @@ $(function() {
         /* a test that ensures when a new feed is loaded the content changes
          */
         it('on new loadFeed the feed content changes', function(done) {
-            // async load second feed item
-            loadFeed(2, function() {
-                secondFeedTitle = $('.header-title').text();
-                secondFeedEntries = $('.entry');
+            var feedCount = allFeeds.length;
+            // we need at least two feeds in allFeeds to test if the content changes
+            expect(feedCount >= 2).toBe(true);
+            // choose a random feed item id to test (except the first item)
+            var randomFeedId = Math.floor(Math.random() * feedCount) + 1;
+            loadFeed(randomFeedId, function() {
+                otherFeedTitle = $('.header-title').text();
+                otherFeedEntries = $('.entry').text();
                 // the heading for the feed should have changed
-                expect(firstFeedTitle).not.toBe(secondFeedTitle);
+                expect(firstFeedTitle).not.toBe(otherFeedTitle);
                 // the feed entries for the feed should have changed
-                expect(firstFeedEntries).not.toBe(secondFeedEntries);
+                expect(firstFeedEntries).not.toBe(otherFeedEntries);
                 done();
             });
-
         });
 
+
         afterEach(function(done) {
-          // reset app so that the initial feed is selected
+            // reset app so that the initial feed is selected
             loadFeed(0);
             done();
         });
