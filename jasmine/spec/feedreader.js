@@ -9,6 +9,7 @@
  * to ensure they don't run until the DOM is ready.
  */
 $(function() {
+
     /* This is our first test suite - a test suite just contains
      * a related set of tests. This suite is all about the RSS
      * feeds definitions, the allFeeds variable in our application.
@@ -35,15 +36,18 @@ $(function() {
 
             expect(allFeeds).toBeDefined();
             expect(allFeeds.length).not.toBe(0);
+
             for (var i = 0; i < allFeeds.length; i++) {
                 var feed = allFeeds[i];
-                expect(feed.url).toBeDefined();
-                expect(isUrl(feed.url)).toBe(true);
+                var feedUrl = feed.url;
+                console.log(feedUrl);
+                expect(feedUrl).toBeDefined();
+                expect(isUrl(feedUrl)).toBe(true);
             }
 
             //http://stackoverflow.com/questions/1701898/how-to-detect-whether-a-string-is-in-url-format-using-javascript
             function isUrl(s) {
-                var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+                var regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
                 return regexp.test(s);
             }
 
@@ -58,12 +62,14 @@ $(function() {
 
             expect(allFeeds).toBeDefined();
             expect(allFeeds.length).not.toBe(0);
+
             for (var i = 0; i < allFeeds.length; i++) {
                 var feed = allFeeds[i];
                 expect(feed.name).toBeDefined();
                 expect(feed.name.length > 0).toBe(true);
             }
         });
+
     });
 
     /* Test suite - 'The Menu'
@@ -127,45 +133,38 @@ $(function() {
      */
     describe('New Feed Selection', function() {
 
-        var firstFeedTitle, firstFeedEntries,
-            otherFeedTitle, otherFeedEntries;
+        var firstFeedTitle,
+            firstFeedEntries;
 
-        beforeEach(function(done) {
+        beforeAll(function(done) {
             expect(allFeeds).toBeDefined();
-            expect(allFeeds.length).not.toBe(0);
+            expect(allFeeds.length).not.toEqual(0);
 
-            // async call to get first feed
-            loadFeed(0, function() {
-                // async load first feed in allFeeds
-                firstFeedTitle = $('.header-title').text();
-                firstFeedEntries = $('entry').text();
-                done();
-            });
-        });
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
 
-        /* a test that ensures when a new feed is loaded the content changes
-         */
-        it('on new loadFeed the feed content changes', function(done) {
-            var feedCount = allFeeds.length;
-            // we need at least two feeds in allFeeds to test if the content changes
-            expect(feedCount >= 2).toBe(true);
-            // choose a random feed item id to test (except the first item)
-            var randomFeedId = Math.floor(Math.random() * feedCount) + 1;
+            var randomFeedId = getRandomInt(1, (allFeeds.length - 1));
+            console.log(randomFeedId);
+
             loadFeed(randomFeedId, function() {
                 otherFeedTitle = $('.header-title').text();
                 otherFeedEntries = $('.entry').text();
-                // the heading for the feed should have changed
-                expect(firstFeedTitle).not.toBe(otherFeedTitle);
-                // the feed entries for the feed should have changed
-                expect(firstFeedEntries).not.toBe(otherFeedEntries);
+            });
+            loadFeed(1, function() {
+                firstFeedTitle = $('.header-title').text();
+                firstFeedEntries = $('.entry').text();
                 done();
             });
         });
 
-
-        afterEach(function(done) {
-            // reset app so that the initial feed is selected
-            loadFeed(0);
+        /* a test that ensures when a new feed is loaded
+         * by the loadFeed function that the content actually changes.
+         */
+        it('should change content', function(done) {
+            var newEntryText = $('.feed').find('.entry')[0].innerHTML;
+            expect(firstFeedTitle).not.toBe(otherFeedTitle);
+            expect(firstFeedEntries).not.toBe(otherFeedEntries);
             done();
         });
     });
