@@ -132,13 +132,7 @@ $(function() {
 
         beforeEach(function(done) {
             expect(allFeeds).toBeDefined();
-            expect(allFeeds.length).not.toEqual(0);
-
-            function getRandomInt(min, max) {
-                return Math.floor(Math.random() * (max - min + 1)) + min;
-            }
-
-            var randomFeedId = getRandomInt(1, (allFeeds.length - 1));
+            expect(allFeeds.length).not.toBeLessThan(2);
 
             loadFeed(0, function() {
                 firstFeed = $('.feed').html();
