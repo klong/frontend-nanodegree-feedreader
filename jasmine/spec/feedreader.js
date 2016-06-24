@@ -37,13 +37,10 @@ $(function() {
             expect(allFeeds).toBeDefined();
             expect(allFeeds.length).not.toBe(0);
 
-            for (var i = 0; i < allFeeds.length; i++) {
-                var feed = allFeeds[i];
-                var feedUrl = feed.url;
-                console.log(feedUrl);
-                expect(feedUrl).toBeDefined();
-                expect(isUrl(feedUrl)).toBe(true);
-            }
+            allFeeds.forEach(function (feed) {
+              expect(feed.url).toBeDefined();
+              expect(isUrl(feed.url)).toBe(true);
+            });
 
             //http://stackoverflow.com/questions/1701898/how-to-detect-whether-a-string-is-in-url-format-using-javascript
             function isUrl(s) {
@@ -110,20 +107,17 @@ $(function() {
         var loadFeedCallBackTest = false;
 
         beforeEach(function(done) {
-            loadFeed(0, function() {
-                loadFeedCallBackTest = true;
-                done();
-            });
+            loadFeedCallBackTest = true;
+            loadFeed(0, done);
         });
 
         /* a test that ensures when the loadFeed
          * function is called and completes its work, there is at least
          * a single .entry element within the .feed container.
          */
-        it('load feed adds entry class to feed container', function(done) {
+        it('load feed adds entry class to feed container', function() {
             expect(loadFeedCallBackTest).toBe(true);
             expect($('.feed .entry').length).toBeGreaterThan(0);
-            done();
         });
 
     });
@@ -133,10 +127,10 @@ $(function() {
      */
     describe('New Feed Selection', function() {
 
-        var firstFeedTitle,
-            firstFeedEntries;
+        var firstFeed,
+            secondFeed;
 
-        beforeAll(function(done) {
+        beforeEach(function(done) {
             expect(allFeeds).toBeDefined();
             expect(allFeeds.length).not.toEqual(0);
 
@@ -145,27 +139,21 @@ $(function() {
             }
 
             var randomFeedId = getRandomInt(1, (allFeeds.length - 1));
-            console.log(randomFeedId);
 
-            loadFeed(randomFeedId, function() {
-                otherFeedTitle = $('.header-title').text();
-                otherFeedEntries = $('.entry').text();
-            });
-            loadFeed(1, function() {
-                firstFeedTitle = $('.header-title').text();
-                firstFeedEntries = $('.entry').text();
-                done();
+            loadFeed(0, function() {
+                firstFeed = $('.feed').html();
+                loadFeed(1, function() {
+                  secondFeed = $('.feed').html();
+                  done();
+                });
             });
         });
 
         /* a test that ensures when a new feed is loaded
          * by the loadFeed function that the content actually changes.
          */
-        it('should change content', function(done) {
-            var newEntryText = $('.feed').find('.entry')[0].innerHTML;
-            expect(firstFeedTitle).not.toBe(otherFeedTitle);
-            expect(firstFeedEntries).not.toBe(otherFeedEntries);
-            done();
+        it('should change content', function() {
+            expect(firstFeed).not.toBe(secondFeed);
         });
     });
 }());
